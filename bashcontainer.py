@@ -68,8 +68,15 @@ class ContainerManager:
         settingsFile.write(self.__toJsonString())
         settingsFile.close()
 
-# Contenedor de comandos
+    # Retorn el indice de un contenedor dado su nombre si es posible. 
+    # defualt: None
+    def getContainerIndex(self, containerName): 
+        for (i, x) in enumerate(self.containers):
+            if x.name == containerName:
+                return i
+        return None
 
+# Contenedor de comandos
 
 class Container:
     def __init__(self, name, commands=[]):
@@ -93,7 +100,6 @@ class Container:
     # Agrega un comando a la lista (en el final)
     def addCommand(self, command):
         self.commands.append(command)
-
 
 c = ContainerManager("/home/stiveun/Desktop/prueba.json")
 

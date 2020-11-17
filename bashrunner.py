@@ -1,4 +1,43 @@
 from argparse import ArgumentParser
+from bashcontainer import ContainerManager, Container
+from os.path import expanduser, join
+
+SETTINGS_FILE_NAME = ".bashRunnerSettings.json"
+
+class BashRunner:
+
+    def __init__(self, args, path):
+        self.args = args
+        self.containerManager = ContainerManager(path)
+
+    # Ejecuta los comandos
+    def run(self):
+        (command, args) = self.args
+        print(command)
+        print(args)
+        if command.current:
+           self.__printCurrentContainer()
+        
+        elif command.create != None:
+           self.__createContainer(command.create) 
+
+    # Imprime el nombre del contenedor actual
+    def __printCurrentContainer(self):
+        currentContainer = self.containerManager.currentContainer
+        if currentContainer == None:
+            print("There is currently no container configured")
+        else:
+            print("Current container %s" % currentContainer)
+
+    # Crea un contenedor vacio
+    def __createContainer(self, name):
+        if self.containerManager.getContainerIndex(name) != None:
+         print("Container already exists %s" % name)
+        else:
+            newContainer = Container(name, [])
+            self.containerManager.containers.append(newContainer)
+            self.containerManager.writeSettingsFile()
+            print("Container has been created %s" % name)
 
 def parseArguments():
     parser = ArgumentParser()
@@ -30,5 +69,15 @@ def parseArguments():
                         help="add command to a container")
     return parser.parse_known_args()
 
-args = parseArguments()
-print(args)
+def main():
+    args = parseArguments()
+
+    # Genera la ruta del archivo de configuracion
+    global SETTINGS_FILE_NAME
+    home = expanduser("~")
+    settingFilePath = join(home, SETTINGS_FILE_NAME)
+    bashRunner = BashRunner(args, settingFilePath)
+    bashRunner.run()
+
+if __name__ == "__main__":
+    main()
