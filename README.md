@@ -4,13 +4,13 @@
 * Delete current container
    * --delete -d
 * Delete container
-   * --delete <name>
+   * --delete "<name>"
 * Create a container
-   * --create -c <name>
+   * --create -c "<name>"
 * Configure a container (based on name)
-   * --set -s <name>
+   * --set -s "<name>"
 * View the list of commands in a container
-   * --dump <name>
+   * --dump "<name>"
 * View the list of commands in a current container
    * --dump
 * View the list of container
