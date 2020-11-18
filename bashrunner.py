@@ -1,8 +1,9 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, REMAINDER
 from bashcontainer import ContainerManager, Container
 from os.path import expanduser, join
 
 SETTINGS_FILE_NAME = ".bashRunnerSettings.json"
+
 
 class BashRunner:
 
@@ -12,14 +13,13 @@ class BashRunner:
 
     # Ejecuta los comandos
     def run(self):
-        (command, args) = self.args
+        command = self.args
         print(command)
-        print(args)
+
         if command.current:
-           self.__printCurrentContainer()
-        
+            self.__printCurrentContainer()
         elif command.create != None:
-           self.__createContainer(command.create) 
+            self.__createContainer(command.create)
         elif command.set != None:
             self.__setCurrentContainer(command.set)
         elif command.list:
@@ -38,7 +38,7 @@ class BashRunner:
     # Crea un contenedor vacio
     def __createContainer(self, name):
         if self.containerManager.getContainerIndex(name) != None:
-         print("Container already exists %s" % name)
+            print("Container already exists %s" % name)
         else:
             newContainer = Container(name, [])
             self.containerManager.containers.append(newContainer)
@@ -50,11 +50,11 @@ class BashRunner:
         index = self.containerManager.getContainerIndex(name)
         if index == None:
             print("Cannot configure container %s" % index)
-        else :
+        else:
             self.containerManager.currentContainer = name
             self.containerManager.writeSettingsFile()
             print("The current container is %s" % name)
-    
+
     # Imprime la lista de contenedores disponibles
     def __getListOfContainer(self):
         containers = self.containerManager.containers
@@ -63,7 +63,7 @@ class BashRunner:
         else:
             for container in containers:
                 print("- %s" % container.name)
-    
+
     # Elimina un contenedor
     def __deleteContainer(self, containers):
         if len(containers) == 0:
@@ -75,7 +75,7 @@ class BashRunner:
         while len(containers) != 0:
             name = containers.pop(0)
             index = self.containerManager.getContainerIndex(name)
-            
+
             if index == None:
                 print("Container does not exist %s" % name)
             else:
@@ -88,6 +88,9 @@ class BashRunner:
         self.containerManager.writeSettingsFile()
         print("Successfully removed")
 
+
+# Parser Arguments
+#--------------------------------------------------------------------------------------------------------
 def parseArguments():
     parser = ArgumentParser()
     parser.add_argument("--current",
@@ -112,11 +115,15 @@ def parseArguments():
                         nargs="*",
                         help="Run a container")
     parser.add_argument("--workspace", "-w",
-                        type=str) # agregar help
+                        type=str)
     parser.add_argument("--add", "-a",
-                        nargs="*",
+                        nargs=REMAINDER,
                         help="add command to a container")
-    return parser.parse_known_args()
+    return parser.parse_args()
+
+# Main
+#--------------------------------------------------------------------------------------------------------
+
 
 def main():
     args = parseArguments()
@@ -125,8 +132,10 @@ def main():
     global SETTINGS_FILE_NAME
     home = expanduser("~")
     settingFilePath = join(home, SETTINGS_FILE_NAME)
+   
     bashRunner = BashRunner(args, settingFilePath)
     bashRunner.run()
+
 
 if __name__ == "__main__":
     main()
