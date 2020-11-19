@@ -14,8 +14,7 @@ class BashRunner:
     # Ejecuta los comandos
     def run(self):
         command = self.args
-        print(command)
-
+        
         if command.current:
             self.__printCurrentContainer()
         elif command.create != None:
@@ -30,6 +29,8 @@ class BashRunner:
             self.__addCommand(command.add)
         elif command.dump != None:
             self.__dumpCommands(command.dump)
+        elif command.run != None:
+            self.__runContainers(command.run, command.workspace)
 
     # Imprime el nombre del contenedor actual
     def __printCurrentContainer(self):
@@ -98,20 +99,20 @@ class BashRunner:
         if currentContainerName == None:
             print("No container configured")
             return
-        
+
         index = self.containerManager.getContainerIndex(currentContainerName)
         currentContainer = self.containerManager.containers[index]
         currentContainer.addCommand(command)
         self.containerManager.writeSettingsFile()
-    
+
     # Imprime los comandos de un grupo de contenedores
     def __dumpCommands(self, containers):
         if len(containers) == 0:
             if self.containerManager.currentContainer == None:
                 containers = []
-            else: 
+            else:
                 containers = [self.containerManager.currentContainer]
-        
+
         # A partir de acá tenemos una lista de contenedores para trabajar
         for containersName in containers:
             index = self.containerManager.getContainerIndex(containersName)
@@ -119,13 +120,32 @@ class BashRunner:
             if index == None:
                 print("Container does not exist %s " % containersName)
 
-            else: 
+            else:
                 container = self.containerManager.containers[index]
                 container.dumpData()
 
+    # Corre los contenedores indicados de un worksapce
+    def __runContainers(self, containers, workspace):
+        if len(containers) == 0:
+            if self.containerManager.currentContainer == None:
+                containers = []
+            else:
+                containers = [self.containerManager.currentContainer]
+
+        # A partir de acá tenemos una lista de contenedores para trabajar
+        for containersName in containers:
+            index = self.containerManager.getContainerIndex(containersName)
+
+            if index == None:
+                print("Container does not exist %s " % containersName)
+
+            else:
+                container = self.containerManager.containers[index]
+                container.run(workspace)
 
 # Parser Arguments
-#--------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
+
 def parseArguments():
     parser = ArgumentParser()
     parser.add_argument("--current",
@@ -157,7 +177,7 @@ def parseArguments():
     return parser.parse_args()
 
 # Main
-#--------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
 
 
 def main():
@@ -167,7 +187,7 @@ def main():
     global SETTINGS_FILE_NAME
     home = expanduser("~")
     settingFilePath = join(home, SETTINGS_FILE_NAME)
-   
+
     bashRunner = BashRunner(args, settingFilePath)
     bashRunner.run()
 

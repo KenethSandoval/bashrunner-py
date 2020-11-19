@@ -1,7 +1,9 @@
 import json
-from os.path import isfile
+from os.path import isfile, expanduser, join
 from sys import exit
 from shlex import quote
+from os import remove
+from subprocess import call
 
 # Labels
 #--------------------------------------------------------------------------------------------------------
@@ -129,5 +131,35 @@ class Container:
         print("* %s:" % self.name)
         for command in self.getFormattedCommands():
             print("    > %s" % command)
+    
+    # Corre los comandos del contenedor
+    def run(self, worksapce):
+        # Generamos la ruta del archivo temporal
+        home = expanduser("~")
+        tempBashFile = join(home, "bashRunnerTemp.bash")
 
-c = ContainerManager("/home/stiveun/Desktop/prueba.json")
+        # Eliminamos el archivo temporarl si es que existe
+        if isfile(tempBashFile):
+            remove(tempBashFile)
+
+        # Creamos el archivo temporal de ejecucion
+        f = open(tempBashFile, "w+")
+
+        # Creamos el contenido del archivo
+        commands = self.getFormattedCommands()
+        for i in range(len(commands)):
+            commands[i] = "echo \"{0}\"\n{0}\n".format(commands[i])
+        
+        # Agrega el worksapce si es necesario
+        if worksapce != None:
+            commands = ["cd %s\n" % worksapce] + commands
+        fileContent = "\n".join(commands)
+        f.write(fileContent)
+        f.close()
+
+        # Ejecutamos los comandos
+        call(["bash", tempBashFile])
+
+        # Eliminamos el archivo temporal de ejecución
+        remove(tempBashFile)
+#c = ContainerManager("/home/stiveun/Desktop/prueba.#json")
