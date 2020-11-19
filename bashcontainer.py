@@ -1,6 +1,7 @@
 import json
 from os.path import isfile
 from sys import exit
+from shlex import quote
 
 # Labels
 #--------------------------------------------------------------------------------------------------------
@@ -108,5 +109,25 @@ class Container:
     def addCommand(self, command):
         self.commands.append(command)
 
+    # Retorna la lista de comandos formateados como strings
+    def getFormattedCommands(self):
+        result = []
+        for command in self.commands:
+            tempCommandList = []
+            # Escapar los espacios dentro de un argumento
+            for comm in command:
+                if " " in comm:
+                    comm = quote(comm)
+                tempCommandList.append(comm)
+
+            tempCommand = " ".join(tempCommandList)
+            result.append(tempCommand)
+        return result
+
+    # Imprime los comandos del contenedor
+    def dumpData(self):
+        print("* %s:" % self.name)
+        for command in self.getFormattedCommands():
+            print("    > %s" % command)
 
 c = ContainerManager("/home/stiveun/Desktop/prueba.json")
